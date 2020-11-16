@@ -1,0 +1,28 @@
+{
+    "extends": "airbnb",
+    "env": {
+        "node": true
+    },
+    "parser": "babel-eslint",
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly",
+        "describe": "readonly",
+        "it": "readonly"
+    },
+    "plugins": [
+        "babel"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
+    "rules": {
+        "camelcase": 0,
+        "object-curly-newline": 0,
+        "max-classes-per-file": 0,
+        "max-len": 0,
+        "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
+        "class-methods-use-this": 0
+    }
+}
