@@ -4,8 +4,12 @@ import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import logger from 'morgan';
 import helmet from 'helmet';
+import '@utils/proxy';
+import '@utils/passport';
 
 import indexRouter from './routes/index';
+import userRouter from './routes/user';
+import authRouter from './routes/auth';
 
 const app = express();
 
@@ -30,6 +34,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 app.use('/api/v1/', indexRouter);
+app.use('/api/v1/user', userRouter);
+app.use('/auth', authRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res) => {

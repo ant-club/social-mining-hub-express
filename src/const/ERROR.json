@@ -11,12 +11,10 @@
     "code": 502,
     "message": "业务出错，请稍后再试"
   },
-  "NO_ADAPTOR": {
-    "code": 503,
-    "message": "未找到网络"
-  },
-  "MONI_ADDRESS_ERR": {
-    "code": 600,
-    "message": "地址解析错误"
+  "USER": {
+    "ADDRESS_FORMAT_ERR": {
+      "code": 601,
+      "message": "address format error"
+    }
   }
 }

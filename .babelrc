@@ -4,7 +4,16 @@
     "@babel/plugin-proposal-object-rest-spread",
     ["@babel/plugin-proposal-decorators", {"decoratorsBeforeExport": true}],
     "@babel/plugin-transform-runtime",
-    "@babel/plugin-proposal-class-properties"
+    "@babel/plugin-proposal-class-properties",
+    ["module-resolver", {
+      "root": ["./"],
+      "alias": {
+        "@const": ["./src/const"],
+        "@db": ["./src/db"],
+        "@middlewares": ["./src/middlewares"],
+        "@utils": ["./src/utils"]
+      }
+    }]
   ],
   "presets": [
     [

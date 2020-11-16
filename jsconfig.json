@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@const/*": ["./src/const/*"],
+      "@db/*": ["./src/db/*"],
+      "@middlewares/*": ["./src/middlewares/*"],
+      "@utils/*": ["./src/utils/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist"]
+}
