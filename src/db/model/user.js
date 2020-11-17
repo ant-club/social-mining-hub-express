@@ -4,10 +4,36 @@
 /* eslint-disable no-use-before-define */
 import Sequelize from 'sequelize';
 import uuidAPIKey from 'uuid-apikey';
+import { toChecksumAddress } from 'ethereum-checksum-address';
+import { isEthAddress } from '@utils/eth';
 
 const { Model } = Sequelize;
 
 class User extends Model {
+  static findAddress(address) {
+    if (!isEthAddress(address)) {
+      return Promise.reject();
+    }
+    return User.findOne({
+      where: {
+        address: toChecksumAddress(address),
+      },
+    });
+  }
+
+  addSocialAccount(provider, accountId, displayName, profileUrl, info) {
+    const { sequelize } = User;
+    const SocialAccount = sequelize.model('social_account');
+    return SocialAccount.create({
+      userId: this.id,
+      provider,
+      accountId,
+      displayName,
+      profileUrl,
+      info: info ? JSON.stringify(info) : null,
+    });
+  }
+
   getData() {
     const ret = {
       apikey: this.apikey,
@@ -39,55 +65,6 @@ function model(sequelize) {
     },
     // email
     email: {
-      type: Sequelize.STRING,
-    },
-    // twitter
-    twitterId: {
-      type: Sequelize.STRING,
-    },
-    twitterInfo: {
-      type: Sequelize.STRING,
-    },
-    // telegram
-    telegramId: {
-      type: Sequelize.STRING,
-    },
-    telegramInfo: {
-      type: Sequelize.STRING,
-    },
-    // youTube
-    youTubeId: {
-      type: Sequelize.STRING,
-    },
-    youTubeInfo: {
-      type: Sequelize.STRING,
-    },
-    // wechat
-    wechatId: {
-      type: Sequelize.STRING,
-    },
-    wechatInfo: {
-      type: Sequelize.STRING,
-    },
-    // weibo
-    weiboId: {
-      type: Sequelize.STRING,
-    },
-    weiboInfo: {
-      type: Sequelize.STRING,
-    },
-    // github
-    githubId: {
-      type: Sequelize.STRING,
-    },
-    githubInfo: {
-      type: Sequelize.STRING,
-    },
-    // google
-    googleId: {
-      type: Sequelize.STRING,
-    },
-    googleInfo: {
       type: Sequelize.STRING,
     },
   }, {

@@ -15,4 +15,5 @@ passport.use(new FacebookStrategy({
   clientSecret: FACEBOOK_APP_SECRET,
   callbackURL: FACEBOOK_CALLBACK_URL,
   passReqToCallback: true,
-}, (req, accessToken, refreshToken, profile, done) => done(null, { req: req.query, profile })));
+  profileFields: ['id', 'displayName', 'email', 'link'],
+}, (req, accessToken, refreshToken, profile, done) => done(null, profile)));

@@ -4,17 +4,16 @@ import varsProvider from '@middlewares/varsProvider';
 import { toChecksumAddress } from 'ethereum-checksum-address';
 import ERROR from '@const/ERROR.json';
 import { Models } from '@db/index';
+import { isEthAddress } from '@utils/eth';
 
 const router = express.Router();
 const { User } = Models;
-
-const ethAddressReg = /^0x[a-fA-F0-9]{40}$/;
 
 /* GET home page. */
 router.get('/:address.json', (req, res, next) => {
   const { address } = req.params;
 
-  if (!ethAddressReg.test(address)) {
+  if (!isEthAddress(address)) {
     res.json_error_code = ERROR.USER.ADDRESS_FORMAT_ERR.code;
     res.json_error = ERROR.USER.ADDRESS_FORMAT_ERR.message;
     next();
