@@ -1,5 +1,8 @@
 import passport from 'passport';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
+import { Strategy as GitHubStrategy } from 'passport-github2';
+// import { Strategy as YoutubeStrategy } from 'passport-youtube-v3';
+import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth';
 
 const CONFIG = JSON.parse(process.env.PASSPORT);
 
@@ -17,3 +20,26 @@ passport.use(new FacebookStrategy({
   passReqToCallback: true,
   profileFields: ['id', 'displayName', 'email', 'link'],
 }, (req, accessToken, refreshToken, profile, done) => done(null, profile)));
+
+const {
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  GITHUB_CALLBACK_URL,
+} = CONFIG;
+passport.use(new GitHubStrategy({
+  clientID: GITHUB_CLIENT_ID,
+  clientSecret: GITHUB_CLIENT_SECRET,
+  callbackURL: GITHUB_CALLBACK_URL,
+}, (accessToken, refreshToken, profile, done) => done(null, profile)));
+
+const {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_CALLBACK_URL,
+} = CONFIG;
+passport.use(new GoogleStrategy({
+  clientID: GOOGLE_CLIENT_ID,
+  clientSecret: GOOGLE_CLIENT_SECRET,
+  callbackURL: GOOGLE_CALLBACK_URL,
+  scope: ['https://www.googleapis.com/auth/userinfo.email', 'profile'],
+}, (accessToken, refreshToken, profile, done) => done(null, profile)));

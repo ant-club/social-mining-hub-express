@@ -10,7 +10,7 @@ const { Model } = Sequelize;
 const SOCIAL_ACCOUNT_PROVIDER = {
   twitter: 'twitter',
   telegram: 'telegram',
-  youTube: 'youTube',
+  youtube: 'youtube',
   wechat: 'wechat',
   weibo: 'weibo',
   github: 'github',

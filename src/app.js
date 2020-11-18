@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
+// import sessionParser from 'express-session';
 import bodyParser from 'body-parser';
 import logger from 'morgan';
 import helmet from 'helmet';
@@ -24,6 +25,11 @@ app.use(helmet());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+// app.use(sessionParser({
+//   secret: process.env.COOKIE_SECRET,
+//   resave: false,
+//   saveUninitialized: true,
+// }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
