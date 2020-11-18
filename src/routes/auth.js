@@ -221,13 +221,69 @@ router.get('/google/callback', (req, res, next) => {
         res.redirect(AUTH_FAIL_REDIRECT);
         return;
       }
-      res.redirect(AUTH_SUCCESS_REDIRECT);
       user.addSocialAccount(
         SOCIAL_ACCOUNT_PROVIDER.google,
         account.id,
         account.displayName,
         null,
         account._json,
+      ).then((raw) => {
+        if (raw) {
+          res.redirect(AUTH_SUCCESS_REDIRECT);
+        } else {
+          res.redirect(AUTH_FAIL_REDIRECT);
+        }
+      });
+    })(req, res, next);
+  }).catch(() => {
+    res.redirect(AUTH_FAIL_REDIRECT);
+  });
+});
+
+// telegram
+router.get('/telegram', (req, res) => {
+  const address = getCookieValue(req, 'auth_address');
+  User.findAddress(address).then((user) => {
+    if (!user) {
+      res.redirect(AUTH_FAIL_REDIRECT);
+      return;
+    }
+    setCookieValue(res, 'auth_info', {
+      address,
+      provider: SOCIAL_ACCOUNT_PROVIDER.telegram,
+    });
+    res.render('auth_telegram');
+  }).catch(() => {
+    res.redirect(AUTH_FAIL_REDIRECT);
+  });
+});
+router.get('/telegram/callback', (req, res, next) => {
+  const authInfo = getCookieValue(req, 'auth_info');
+  const {
+    address,
+    provider,
+  } = authInfo;
+  if (!authInfo || provider !== SOCIAL_ACCOUNT_PROVIDER.telegram) {
+    res.redirect(AUTH_FAIL_REDIRECT);
+    return;
+  }
+  User.findAddress(address).then((user) => {
+    if (!user) {
+      res.redirect(AUTH_FAIL_REDIRECT);
+      return;
+    }
+    passport.authenticate('telegram', (err, account) => {
+      if (!user) {
+        // 授权失败
+        res.redirect(AUTH_FAIL_REDIRECT);
+        return;
+      }
+      user.addSocialAccount(
+        SOCIAL_ACCOUNT_PROVIDER.telegram,
+        account.id,
+        account.username,
+        null,
+        account,
       ).then((raw) => {
         if (raw) {
           res.redirect(AUTH_SUCCESS_REDIRECT);

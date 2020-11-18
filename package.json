@@ -44,6 +44,7 @@
     "passport-github2": "^0.1.12",
     "passport-google-oauth": "^2.0.0",
     "passport-medium-v2": "^0.0.1",
+    "passport-telegram-official": "^1.1.0",
     "passport-youtube-v3": "^2.1.0",
     "promise-sequential": "^1.1.1",
     "qs": "^6.9.1",

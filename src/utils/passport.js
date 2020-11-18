@@ -3,6 +3,7 @@ import { Strategy as FacebookStrategy } from 'passport-facebook';
 import { Strategy as GitHubStrategy } from 'passport-github2';
 // import { Strategy as YoutubeStrategy } from 'passport-youtube-v3';
 import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth';
+import { TelegramStrategy } from 'passport-telegram-official';
 
 const CONFIG = JSON.parse(process.env.PASSPORT);
 
@@ -43,3 +44,8 @@ passport.use(new GoogleStrategy({
   callbackURL: GOOGLE_CALLBACK_URL,
   scope: ['https://www.googleapis.com/auth/userinfo.email', 'profile'],
 }, (accessToken, refreshToken, profile, done) => done(null, profile)));
+
+const { TELEGRAM_BOT_TOKEN } = CONFIG;
+passport.use(new TelegramStrategy({
+  botToken: TELEGRAM_BOT_TOKEN,
+}, (profile, done) => done(null, profile)));
