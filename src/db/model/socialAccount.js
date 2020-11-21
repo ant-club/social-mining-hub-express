@@ -24,10 +24,9 @@ const provider = Object.values(SOCIAL_ACCOUNT_PROVIDER);
 class SocialAccount extends Model {
   getData() {
     const ret = {
-      apikey: this.apikey,
-      uuid: this.uuid,
-      address: this.address,
-      email: this.email,
+      provider: this.provider,
+      displayName: this.displayName,
+      profileUrl: this.profileUrl,
     };
     return ret;
   }

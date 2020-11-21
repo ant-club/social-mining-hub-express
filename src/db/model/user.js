@@ -2,12 +2,14 @@
 /* eslint-disable no-bitwise */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-use-before-define */
-import Sequelize from 'sequelize';
+import Sequelize, { STRING } from 'sequelize';
 import uuidAPIKey from 'uuid-apikey';
 import { toChecksumAddress } from 'ethereum-checksum-address';
 import { isEthAddress } from '@utils/eth';
 
 const { Model } = Sequelize;
+
+const { UPLOAD_STATIC_PATH } = process.env;
 
 class User extends Model {
   static findAddress(address) {
@@ -40,7 +42,21 @@ class User extends Model {
       uuid: this.uuid,
       address: this.address,
       email: this.email,
+      displayName: this.displayName,
+      avatar: UPLOAD_STATIC_PATH + this.avatar,
+      stateCode: this.stateCode,
+      language: this.language,
+      description: this.description,
     };
+    if (this.socialAccounts) {
+      ret.socialAccounts = this.socialAccounts.map((c) => c.getData()).reduce((a, b) => {
+        a[b.provider] = {
+          displayName: b.displayName,
+          profileUrl: b.profileUrl,
+        };
+        return a;
+      }, {});
+    }
     return ret;
   }
 }
@@ -66,6 +82,22 @@ function model(sequelize) {
     // email
     email: {
       type: Sequelize.STRING,
+    },
+    // 显示的名字
+    displayName: {
+      type: Sequelize.STRING,
+    },
+    avatar: {
+      type: Sequelize.STRING,
+    },
+    stateCode: {
+      type: Sequelize.STRING(3),
+    },
+    language: {
+      type: Sequelize.ENUM('zh-cn', 'en', 'jp', 'kr', 'ru'),
+    },
+    description: {
+      type: Sequelize.STRING(1000),
     },
   }, {
     sequelize,

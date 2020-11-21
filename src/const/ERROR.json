@@ -11,10 +11,18 @@
     "code": 502,
     "message": "业务出错，请稍后再试"
   },
+  "UPLOAD_NOFILE": {
+    "code": 503,
+    "message": "未上传附件，请确认"
+  },
   "USER": {
     "ADDRESS_FORMAT_ERR": {
       "code": 601,
       "message": "address format error"
+    },
+    "ADDRESS_SIGN_ERR": {
+      "code": 602,
+      "message": "login signature error"
     }
   }
 }

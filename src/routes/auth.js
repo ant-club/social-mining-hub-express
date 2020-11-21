@@ -5,6 +5,7 @@ import jsonResponse from '@middlewares/jsonResponse';
 import argsCheck from '@middlewares/argsCheck';
 import { toChecksumAddress } from 'ethereum-checksum-address';
 import ERROR from '@const/ERROR.json';
+import userParser from '@middlewares/userParser';
 import { getCookieValue, setCookieValue } from '@utils/cookie';
 import { Models, SOCIAL_ACCOUNT_PROVIDER } from '@db/index';
 import fetch from '@utils/fetch';
@@ -12,8 +13,8 @@ import fetch from '@utils/fetch';
 const router = express.Router();
 const { User } = Models;
 
-const AUTH_FAIL_REDIRECT = '/test/#/auth_fail';
-const AUTH_SUCCESS_REDIRECT = '/test/#/auth_success';
+const AUTH_FAIL_REDIRECT = '/auth_fail.html';
+const AUTH_SUCCESS_REDIRECT = '/auth_success.html';
 
 // TODO: JSON POST API鉴权地址
 router.get('/token', argsCheck('address'), (req, res, next) => {
@@ -23,278 +24,147 @@ router.get('/token', argsCheck('address'), (req, res, next) => {
 });
 
 // facebook
-router.get('/facebook', (req, res, next) => {
-  const address = getCookieValue(req, 'auth_address');
-  User.findAddress(address).then((user) => {
-    if (!user) {
+router.get('/facebook', userParser, passport.authenticate('facebook', { scope: ['user_link', 'email'] }));
+router.get('/facebook/callback', userParser, (req, res, next) => {
+  const { authUser } = req;
+  passport.authenticate('facebook', { scope: ['user_link', 'email'] }, (err, account) => {
+    if (!account) {
       res.redirect(AUTH_FAIL_REDIRECT);
       return;
     }
-    setCookieValue(res, 'auth_info', {
-      address,
-      provider: SOCIAL_ACCOUNT_PROVIDER.facebook,
-    });
-    next();
-  }).catch(() => {
-    res.redirect(AUTH_FAIL_REDIRECT);
-  });
-}, passport.authenticate('facebook', { scope: ['user_link', 'email'] }));
-
-router.get('/facebook/callback', (req, res, next) => {
-  const authInfo = getCookieValue(req, 'auth_info');
-  const {
-    address,
-    provider,
-  } = authInfo;
-  if (!authInfo || provider !== SOCIAL_ACCOUNT_PROVIDER.facebook) {
-    res.redirect(AUTH_FAIL_REDIRECT);
-    return;
-  }
-  User.findAddress(address).then((user) => {
-    if (!user) {
-      res.redirect(AUTH_FAIL_REDIRECT);
-      return;
-    }
-    passport.authenticate('facebook', { scope: ['user_link', 'email'] }, (err, account) => {
-      if (!user) {
-        // 授权失败
+    authUser.addSocialAccount(
+      SOCIAL_ACCOUNT_PROVIDER.facebook,
+      account.id,
+      account.displayName,
+      account.profileUrl,
+    ).then((raw) => {
+      if (raw) {
+        res.redirect(AUTH_SUCCESS_REDIRECT);
+      } else {
         res.redirect(AUTH_FAIL_REDIRECT);
-        return;
       }
-      user.addSocialAccount(
-        SOCIAL_ACCOUNT_PROVIDER.facebook,
-        account.id,
-        account.displayName,
-        account.profileUrl,
-      ).then((raw) => {
-        if (raw) {
-          res.redirect(AUTH_SUCCESS_REDIRECT);
-        } else {
-          res.redirect(AUTH_FAIL_REDIRECT);
-        }
-      });
-    })(req, res, next);
-  }).catch(() => {
-    res.redirect(AUTH_FAIL_REDIRECT);
-  });
+    });
+  })(req, res, next);
 });
 
 // medium
-router.get('/medium', argsCheck('token'), (req, res) => {
+router.get('/medium', userParser, argsCheck('token'), (req, res) => {
+  const { authUser } = req;
   const { token } = req.query;
-  const address = getCookieValue(req, 'auth_address');
-  User.findAddress(address).then((user) => {
-    if (!user) {
+  fetch.get('https://api.medium.com/v1/me', {}, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Accept-Charset': 'utf-8',
+    },
+  }).then((resp) => {
+    const { data } = resp;
+    if (data.errors) {
       res.redirect(AUTH_FAIL_REDIRECT);
       return;
     }
-    fetch.get('https://api.medium.com/v1/me', {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        'Accept-Charset': 'utf-8',
+    authUser.addSocialAccount(
+      SOCIAL_ACCOUNT_PROVIDER.medium,
+      data.data.id,
+      data.data.name,
+      data.data.url,
+      {
+        ...data.data,
+        token,
       },
-    }).then((resp) => {
-      const { data } = resp;
-      if (data.errors) {
+    ).then((raw) => {
+      if (raw) {
+        res.redirect(AUTH_SUCCESS_REDIRECT);
+      } else {
         res.redirect(AUTH_FAIL_REDIRECT);
-        return;
       }
-      user.addSocialAccount(
-        SOCIAL_ACCOUNT_PROVIDER.medium,
-        data.data.id,
-        data.data.name,
-        data.data.url,
-        data.data,
-      ).then((raw) => {
-        if (raw) {
-          res.redirect(AUTH_SUCCESS_REDIRECT);
-        } else {
-          res.redirect(AUTH_FAIL_REDIRECT);
-        }
-      });
     });
-  }).catch(() => {
-    res.redirect(AUTH_FAIL_REDIRECT);
   });
 });
 
 // github
-router.get('/github', (req, res, next) => {
-  const address = getCookieValue(req, 'auth_address');
-  User.findAddress(address).then((user) => {
-    if (!user) {
+router.get('/github', userParser, passport.authenticate('github', { scope: ['read:user', 'user:email'] }));
+router.get('/github/callback', userParser, (req, res, next) => {
+  const { authUser } = req;
+  passport.authenticate('github', { scope: ['user_link', 'email'] }, (err, account) => {
+    if (!account) {
+      // 授权失败
       res.redirect(AUTH_FAIL_REDIRECT);
       return;
     }
-    setCookieValue(res, 'auth_info', {
-      address,
-      provider: SOCIAL_ACCOUNT_PROVIDER.github,
-    });
-    next();
-  }).catch(() => {
-    res.redirect(AUTH_FAIL_REDIRECT);
-  });
-}, passport.authenticate('github', { scope: ['read:user', 'user:email'] }));
-
-router.get('/github/callback', (req, res, next) => {
-  const authInfo = getCookieValue(req, 'auth_info');
-  const {
-    address,
-    provider,
-  } = authInfo;
-  if (!authInfo || provider !== SOCIAL_ACCOUNT_PROVIDER.github) {
-    res.redirect(AUTH_FAIL_REDIRECT);
-    return;
-  }
-  User.findAddress(address).then((user) => {
-    if (!user) {
-      res.redirect(AUTH_FAIL_REDIRECT);
-      return;
-    }
-    passport.authenticate('github', { scope: ['user_link', 'email'] }, (err, account) => {
-      if (!user) {
-        // 授权失败
+    authUser.addSocialAccount(
+      SOCIAL_ACCOUNT_PROVIDER.github,
+      account.id,
+      account.username,
+      account.profileUrl,
+      {
+        emails: account.emails,
+        photos: account.photos,
+        json: account._json,
+      },
+    ).then((raw) => {
+      if (raw) {
+        res.redirect(AUTH_SUCCESS_REDIRECT);
+      } else {
         res.redirect(AUTH_FAIL_REDIRECT);
-        return;
       }
-      user.addSocialAccount(
-        SOCIAL_ACCOUNT_PROVIDER.github,
-        account.id,
-        account.username,
-        account.profileUrl,
-        {
-          emails: account.emails,
-          photos: account.photos,
-          json: account._json,
-        },
-      ).then((raw) => {
-        if (raw) {
-          res.redirect(AUTH_SUCCESS_REDIRECT);
-        } else {
-          res.redirect(AUTH_FAIL_REDIRECT);
-        }
-      });
-    })(req, res, next);
-  }).catch(() => {
-    res.redirect(AUTH_FAIL_REDIRECT);
-  });
+    });
+  })(req, res, next);
 });
 
 // google
-router.get('/google', (req, res, next) => {
-  const address = getCookieValue(req, 'auth_address');
-  User.findAddress(address).then((user) => {
-    if (!user) {
+router.get('/google', userParser, passport.authenticate('google'));
+router.get('/google/callback', userParser, (req, res, next) => {
+  const { authUser } = req;
+  passport.authenticate('google', (err, account) => {
+    if (!account) {
+      // 授权失败
       res.redirect(AUTH_FAIL_REDIRECT);
       return;
     }
-    setCookieValue(res, 'auth_info', {
-      address,
-      provider: SOCIAL_ACCOUNT_PROVIDER.google,
-    });
-    next();
-  }).catch(() => {
-    res.redirect(AUTH_FAIL_REDIRECT);
-  });
-}, passport.authenticate('google'));
-
-router.get('/google/callback', (req, res, next) => {
-  const authInfo = getCookieValue(req, 'auth_info');
-  const {
-    address,
-    provider,
-  } = authInfo;
-  if (!authInfo || provider !== SOCIAL_ACCOUNT_PROVIDER.google) {
-    res.redirect(AUTH_FAIL_REDIRECT);
-    return;
-  }
-  User.findAddress(address).then((user) => {
-    if (!user) {
-      res.redirect(AUTH_FAIL_REDIRECT);
-      return;
-    }
-    passport.authenticate('google', (err, account) => {
-      if (!user) {
-        // 授权失败
+    authUser.addSocialAccount(
+      SOCIAL_ACCOUNT_PROVIDER.google,
+      account.id,
+      account.displayName,
+      null,
+      account._json,
+    ).then((raw) => {
+      if (raw) {
+        res.redirect(AUTH_SUCCESS_REDIRECT);
+      } else {
         res.redirect(AUTH_FAIL_REDIRECT);
-        return;
       }
-      user.addSocialAccount(
-        SOCIAL_ACCOUNT_PROVIDER.google,
-        account.id,
-        account.displayName,
-        null,
-        account._json,
-      ).then((raw) => {
-        if (raw) {
-          res.redirect(AUTH_SUCCESS_REDIRECT);
-        } else {
-          res.redirect(AUTH_FAIL_REDIRECT);
-        }
-      });
-    })(req, res, next);
-  }).catch(() => {
-    res.redirect(AUTH_FAIL_REDIRECT);
-  });
+    });
+  })(req, res, next);
 });
 
 // telegram
-router.get('/telegram', (req, res) => {
-  const address = getCookieValue(req, 'auth_address');
-  User.findAddress(address).then((user) => {
-    if (!user) {
-      res.redirect(AUTH_FAIL_REDIRECT);
-      return;
-    }
-    setCookieValue(res, 'auth_info', {
-      address,
-      provider: SOCIAL_ACCOUNT_PROVIDER.telegram,
-    });
-    res.render('auth_telegram');
-  }).catch(() => {
-    res.redirect(AUTH_FAIL_REDIRECT);
-  });
+router.get('/telegram', userParser, (req, res) => {
+  res.render('auth_telegram');
 });
-router.get('/telegram/callback', (req, res, next) => {
-  const authInfo = getCookieValue(req, 'auth_info');
-  const {
-    address,
-    provider,
-  } = authInfo;
-  if (!authInfo || provider !== SOCIAL_ACCOUNT_PROVIDER.telegram) {
-    res.redirect(AUTH_FAIL_REDIRECT);
-    return;
-  }
-  User.findAddress(address).then((user) => {
-    if (!user) {
+router.get('/telegram/callback', userParser, (req, res, next) => {
+  const { authUser } = req;
+  passport.authenticate('telegram', (err, account) => {
+    if (!account) {
+      // 授权失败
       res.redirect(AUTH_FAIL_REDIRECT);
       return;
     }
-    passport.authenticate('telegram', (err, account) => {
-      if (!user) {
-        // 授权失败
+    authUser.addSocialAccount(
+      SOCIAL_ACCOUNT_PROVIDER.telegram,
+      account.id,
+      account.username,
+      null,
+      account,
+    ).then((raw) => {
+      if (raw) {
+        res.redirect(AUTH_SUCCESS_REDIRECT);
+      } else {
         res.redirect(AUTH_FAIL_REDIRECT);
-        return;
       }
-      user.addSocialAccount(
-        SOCIAL_ACCOUNT_PROVIDER.telegram,
-        account.id,
-        account.username,
-        null,
-        account,
-      ).then((raw) => {
-        if (raw) {
-          res.redirect(AUTH_SUCCESS_REDIRECT);
-        } else {
-          res.redirect(AUTH_FAIL_REDIRECT);
-        }
-      });
-    })(req, res, next);
-  }).catch(() => {
-    res.redirect(AUTH_FAIL_REDIRECT);
-  });
+    });
+  })(req, res, next);
 });
 
 export default router;

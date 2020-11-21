@@ -40,8 +40,18 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 app.use('/api/v1/', indexRouter);
-app.use('/api/v1/user', userRouter);
+app.use('/api/v1/', userRouter);
 app.use('/auth', authRouter);
+
+app.use('/', (req, res) => {
+  if (process.env.NODE_ENV === 'DEV') {
+    res.render('index_dev');
+    return;
+  }
+  res.render('index', {
+    hash: process.env.STATIC_HASH,
+  });
+});
 
 // catch 404 and forward to error handler
 app.use((req, res) => {
