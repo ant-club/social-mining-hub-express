@@ -43,7 +43,7 @@ class User extends Model {
       address: this.address,
       email: this.email,
       displayName: this.displayName,
-      avatar: UPLOAD_STATIC_PATH + this.avatar,
+      avatar: this.avatar ? UPLOAD_STATIC_PATH + this.avatar : null,
       stateCode: this.stateCode,
       language: this.language,
       description: this.description,
