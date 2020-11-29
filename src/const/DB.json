@@ -1,0 +1,25 @@
+{
+  "SOCIAL_ACCOUNT_PROVIDER": {
+    "twitter": "twitter",
+    "telegram": "telegram",
+    "youtube": "youtube",
+    "wechat": "wechat",
+    "weibo": "weibo",
+    "github": "github",
+    "google": "google",
+    "medium": "medium",
+    "facebook": "facebook"
+  },
+  "TIMELINE_TYPE": {
+    "user_create": "user_create",
+    "user_update": "user_update",
+    "user_sub_mission_create": "user_sub_mission_create",
+    "user_sub_mission_finish": "user_sub_mission_finish"
+  },
+  "TIMELINE_MODEL": {
+    "user": "user",
+    "mission": "mission",
+    "sub_mission": "sub_mission",
+    "user_sub_mission": "user_sub_mission"
+  }
+}

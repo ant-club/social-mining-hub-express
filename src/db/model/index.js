@@ -1,10 +1,11 @@
 import thevar from './var';
 import user from './user';
-import socialAccount, { SOCIAL_ACCOUNT_PROVIDER } from './socialAccount';
+import socialAccount from './socialAccount';
 import project from './project';
 import mission from './mission';
 import subMission from './subMission';
 import userSubMission from './userSubMission';
+import timeline from './timeline';
 
 const Models = {};
 
@@ -16,6 +17,7 @@ function model(sequelize) {
   Models.Mission = mission(sequelize);
   Models.SubMission = subMission(sequelize);
   Models.UserSubMission = userSubMission(sequelize);
+  Models.Timeline = timeline(sequelize);
   // 关系
   Models.SocialAccount.belongsTo(Models.User, { foreignKey: 'userId', sourceKey: 'id', as: 'user' });
   Models.User.hasMany(Models.SocialAccount, { foreignKey: 'userId', sourceKey: 'id', as: 'socialAccounts' });
@@ -33,6 +35,3 @@ function model(sequelize) {
 }
 
 export default model;
-export {
-  SOCIAL_ACCOUNT_PROVIDER,
-};

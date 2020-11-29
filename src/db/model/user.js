@@ -6,6 +6,7 @@ import Sequelize, { STRING } from 'sequelize';
 import uuidAPIKey from 'uuid-apikey';
 import { toChecksumAddress } from 'ethereum-checksum-address';
 import { isEthAddress } from '@utils/eth';
+import DB from '@const/DB.json';
 
 const { Model } = Sequelize;
 
@@ -107,6 +108,26 @@ function model(sequelize) {
         const key = uuidAPIKey.create();
         instance.uuid = key.uuid;
         instance.apikey = key.apiKey;
+      },
+      afterCreate: (instance) => {
+        const Timeline = sequelize.model('timeline');
+
+        Timeline.create({
+          userId: instance.id,
+          type: DB.TIMELINE_TYPE.user_create,
+          relatedModel: DB.TIMELINE_MODEL.user,
+          relatedId: instance.id,
+        });
+      },
+      afterUpdate: (instance) => {
+        const Timeline = sequelize.model('timeline');
+
+        Timeline.create({
+          userId: instance.id,
+          type: DB.TIMELINE_TYPE.user_update,
+          relatedModel: DB.TIMELINE_MODEL.user,
+          relatedId: instance.id,
+        });
       },
     },
   });

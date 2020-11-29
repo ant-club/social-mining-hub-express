@@ -1,9 +1,7 @@
 import Sequelize from 'sequelize';
-import { SOCIAL_ACCOUNT_PROVIDER } from './socialAccount';
+import DB from '@const/DB.json';
 
 const { Model } = Sequelize;
-
-const provider = Object.values(SOCIAL_ACCOUNT_PROVIDER);
 
 class UserSubMission extends Model {
   getData() {
@@ -62,6 +60,18 @@ function model(sequelize) {
     }],
     sequelize,
     modelName: 'user_sub_mission',
+    hooks: {
+      afterCreate: (instance) => {
+        const Timeline = sequelize.model('timeline');
+
+        Timeline.create({
+          userId: instance.userId,
+          type: DB.TIMELINE_TYPE.user_sub_mission_create,
+          relatedModel: DB.TIMELINE_MODEL.user_sub_mission,
+          relatedId: instance.id,
+        });
+      },
+    },
   });
   return UserSubMission;
 }

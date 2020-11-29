@@ -7,7 +7,8 @@ import { toChecksumAddress } from 'ethereum-checksum-address';
 import ERROR from '@const/ERROR.json';
 import userParser from '@middlewares/userParser';
 import { getCookieValue, setCookieValue } from '@utils/cookie';
-import { Models, SOCIAL_ACCOUNT_PROVIDER } from '@db/index';
+import { Models } from '@db/index';
+import DB from '@const/DB.json';
 import fetch from '@utils/fetch';
 
 const router = express.Router();
@@ -33,7 +34,7 @@ router.get('/facebook/callback', userParser, (req, res, next) => {
       return;
     }
     authUser.addSocialAccount(
-      SOCIAL_ACCOUNT_PROVIDER.facebook,
+      DB.SOCIAL_ACCOUNT_PROVIDER.facebook,
       account.id,
       account.displayName,
       account.profileUrl,
@@ -65,7 +66,7 @@ router.get('/medium', userParser, argsCheck('token'), (req, res) => {
       return;
     }
     authUser.addSocialAccount(
-      SOCIAL_ACCOUNT_PROVIDER.medium,
+      DB.SOCIAL_ACCOUNT_PROVIDER.medium,
       data.data.id,
       data.data.name,
       data.data.url,
@@ -94,7 +95,7 @@ router.get('/github/callback', userParser, (req, res, next) => {
       return;
     }
     authUser.addSocialAccount(
-      SOCIAL_ACCOUNT_PROVIDER.github,
+      DB.SOCIAL_ACCOUNT_PROVIDER.github,
       account.id,
       account.username,
       account.profileUrl,
@@ -124,7 +125,7 @@ router.get('/google/callback', userParser, (req, res, next) => {
       return;
     }
     authUser.addSocialAccount(
-      SOCIAL_ACCOUNT_PROVIDER.google,
+      DB.SOCIAL_ACCOUNT_PROVIDER.google,
       account.id,
       account.displayName,
       null,
@@ -152,7 +153,7 @@ router.get('/telegram/callback', userParser, (req, res, next) => {
       return;
     }
     authUser.addSocialAccount(
-      SOCIAL_ACCOUNT_PROVIDER.telegram,
+      DB.SOCIAL_ACCOUNT_PROVIDER.telegram,
       account.id,
       account.username,
       null,

@@ -4,22 +4,11 @@
 /* eslint-disable no-use-before-define */
 import Sequelize from 'sequelize';
 import uuidAPIKey from 'uuid-apikey';
+import DB from '@const/DB.json';
 
 const { Model } = Sequelize;
 
-const SOCIAL_ACCOUNT_PROVIDER = {
-  twitter: 'twitter',
-  telegram: 'telegram',
-  youtube: 'youtube',
-  wechat: 'wechat',
-  weibo: 'weibo',
-  github: 'github',
-  google: 'google',
-  medium: 'medium',
-  facebook: 'facebook',
-};
-
-const provider = Object.values(SOCIAL_ACCOUNT_PROVIDER);
+const provider = Object.values(DB.SOCIAL_ACCOUNT_PROVIDER);
 
 class SocialAccount extends Model {
   getData() {
@@ -76,6 +65,3 @@ function model(sequelize) {
 }
 
 export default model;
-export {
-  SOCIAL_ACCOUNT_PROVIDER,
-};

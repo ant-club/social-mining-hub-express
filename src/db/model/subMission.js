@@ -1,9 +1,9 @@
 import Sequelize from 'sequelize';
-import { SOCIAL_ACCOUNT_PROVIDER } from './socialAccount';
+import DB from '@const/DB.json';
 
 const { Model } = Sequelize;
 
-const provider = Object.values(SOCIAL_ACCOUNT_PROVIDER);
+const provider = Object.values(DB.SOCIAL_ACCOUNT_PROVIDER);
 
 class SubMission extends Model {
   getData() {

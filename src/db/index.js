@@ -1,5 +1,5 @@
 import Sequelize from 'sequelize';
-import models, { SOCIAL_ACCOUNT_PROVIDER } from './model';
+import models from './model';
 
 const {
   DB_HOST, DB_NAME, DB_USER, DB_PASS,
@@ -19,5 +19,4 @@ const Models = models(db);
 export {
   db,
   Models,
-  SOCIAL_ACCOUNT_PROVIDER,
 };
