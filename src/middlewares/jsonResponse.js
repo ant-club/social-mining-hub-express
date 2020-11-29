@@ -2,7 +2,7 @@ function jsonResponse(req, res) {
   const ret = {
     success: true,
   };
-  if (res.json_data) {
+  if (res.json_data !== undefined) {
     ret.data = res.json_data;
   }
   if (res.json_error) {

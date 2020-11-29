@@ -9,8 +9,10 @@ import '@utils/proxy';
 import '@utils/passport';
 
 import indexRouter from './routes/index';
+import utilsRouter from './routes/utils';
 import userRouter from './routes/user';
 import authRouter from './routes/auth';
+import missionRouter from './routes/mission';
 
 const app = express();
 
@@ -39,19 +41,12 @@ app.use(express.static(path.join(__dirname, 'public'), {
   },
 }));
 
-app.use('/api/v1/', indexRouter);
+app.use('/api/v1/', utilsRouter);
 app.use('/api/v1/', userRouter);
+app.use('/api/v1/', missionRouter);
 app.use('/auth', authRouter);
 
-app.use('/', (req, res) => {
-  if (process.env.NODE_ENV === 'DEV') {
-    res.render('index_dev');
-    return;
-  }
-  res.render('index', {
-    hash: process.env.STATIC_HASH,
-  });
-});
+app.use(indexRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res) => {

@@ -11,7 +11,7 @@ import argsCheck from '@middlewares/argsCheck';
 import { getCookieValue, setCookieValue } from '@utils/cookie';
 
 const router = express.Router();
-const { User } = Models;
+const { User, UserSubMission, SubMission, Mission } = Models;
 
 const LOGIN_MESSAGE = '[%nonce] I will login Ant Club for ONE time';
 
@@ -73,6 +73,55 @@ router.post('/user/me.json', userParser, (req, res, next) => {
   const data = req.body || {};
   authUser.update(data).then((user) => {
     res.json_data = user.getData();
+    next();
+  });
+}, jsonResponse);
+
+router.get('/user/mission/:id.json', userParser, (req, res, next) => {
+  const { authUser } = req;
+  const { params } = req;
+  const { id } = params;
+
+  UserSubMission.findAll({
+    include: [{
+      model: User,
+      where: { id: authUser.id },
+      as: 'user',
+    }, {
+      model: SubMission,
+      include: [{
+        model: Mission,
+        where: { id },
+        as: 'mission',
+      }],
+      as: 'subMission',
+    }],
+  }).then((userSubMissions) => {
+    res.json_data = userSubMissions.map((m) => {
+      const data = m.getData();
+      delete data.user;
+      delete data.subMission;
+      return data;
+    });
+    next();
+  });
+}, jsonResponse);
+
+router.post('/user/sub_mission/:id.json', userParser, argsCheck('link', 'image'), (req, res, next) => {
+  const { authUser } = req;
+  const { params } = req;
+  const { id } = params;
+  const { link, image } = req.body;
+
+  // TODO: 判断任务是否结束
+
+  UserSubMission.create({
+    userId: authUser.id,
+    subMissionId: id,
+    link,
+    image,
+  }).then((subMission) => {
+    res.json_data = subMission.getData();
     next();
   });
 }, jsonResponse);
