@@ -21,5 +21,10 @@
     "mission": "mission",
     "sub_mission": "sub_mission",
     "user_sub_mission": "user_sub_mission"
+  },
+  "MISSION_STATE": {
+    "pending": "pending",
+    "progressing": "progressing",
+    "finished": "finished"
   }
 }

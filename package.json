@@ -5,7 +5,7 @@
   "scripts": {
     "parse": "babel src --out-dir lib --copy-files",
     "start": "npm run parse && node -r ./.env.js ./lib/start.js",
-    "job": "node -r ./.env.js ./lib/job.js",
+    "job": "npm run parse && node -r ./.env.js ./lib/job.js",
     "upload": "./upload.sh",
     "upload_server": "http-server ./upload"
   },
