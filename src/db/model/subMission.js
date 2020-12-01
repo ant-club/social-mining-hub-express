@@ -13,6 +13,7 @@ class SubMission extends Model {
       description: this.description,
       provider: this.provider,
       score: this.score,
+      missionId: this.missionId,
     };
     if (this.mission) {
       ret.mission = this.mission.getData();

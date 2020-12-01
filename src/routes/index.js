@@ -16,5 +16,6 @@ function reactHandler(req, res) {
 router.get('/', reactHandler);
 router.get('/missions', reactHandler);
 router.get('/mission/:id', reactHandler);
+router.get('/history', reactHandler);
 
 export default router;

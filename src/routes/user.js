@@ -146,4 +146,38 @@ router.post('/user/sub_mission/:id.json', userParser.withSocialAccounts, argsChe
   });
 }, jsonResponse);
 
+router.get('/user/sub_missions.json', userParser, (req, res, next) => {
+  const { authUser } = req;
+  const { state } = req.query;
+  const where = {};
+  if (state) {
+    where.state = state;
+  }
+
+  UserSubMission.findAll({
+    include: [{
+      model: User,
+      where: { id: authUser.id },
+      as: 'user',
+    }, {
+      model: SubMission,
+      include: [{
+        model: Mission,
+        as: 'mission',
+        attributes: ['id', 'image', 'name'],
+      }],
+      as: 'subMission',
+      attributes: ['id', 'provider', 'score', 'title'],
+    }],
+    where,
+  }).then((userSubMissions) => {
+    res.json_data = userSubMissions.map((m) => {
+      const data = m.getData();
+      delete data.user;
+      return data;
+    });
+    next();
+  });
+}, jsonResponse);
+
 export default router;

@@ -26,5 +26,10 @@
     "pending": "pending",
     "progressing": "progressing",
     "finished": "finished"
+  },
+  "USER_SUB_MISSION_STATE": {
+    "submitted": "submitted",
+    "reject": "reject",
+    "finish": "finish"
   }
 }

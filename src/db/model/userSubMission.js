@@ -3,6 +3,8 @@ import DB from '@const/DB.json';
 
 const { Model } = Sequelize;
 
+const states = Object.values(DB.USER_SUB_MISSION_STATE);
+
 class UserSubMission extends Model {
   getData() {
     const ret = {
@@ -13,6 +15,7 @@ class UserSubMission extends Model {
       image: this.image,
       state: this.state,
       score: this.score,
+      createdAt: this.createdAt,
     };
     if (this.user) {
       ret.user = this.user.getData();
@@ -43,9 +46,9 @@ function model(sequelize) {
       allowNull: false,
     },
     state: {
-      type: Sequelize.ENUM('submitted', 'reject', 'finish'),
+      type: Sequelize.ENUM(...states),
       allowNull: false,
-      defaultValue: 'submitted',
+      defaultValue: DB.USER_SUB_MISSION_STATE.submitted,
     },
     score: {
       type: Sequelize.INTEGER,
