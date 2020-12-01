@@ -3,6 +3,7 @@ import jsonResponse from '@middlewares/jsonResponse';
 import userParser, { updateLoginCookie } from '@middlewares/userParser';
 import { toChecksumAddress } from 'ethereum-checksum-address';
 import ERROR from '@const/ERROR.json';
+import DB from '@const/DB.json';
 import { Models } from '@db/index';
 import { isEthAddress } from '@utils/eth';
 import * as ethUtil from 'ethereumjs-util';
@@ -107,22 +108,41 @@ router.get('/user/mission/:id.json', userParser, (req, res, next) => {
   });
 }, jsonResponse);
 
-router.post('/user/sub_mission/:id.json', userParser, argsCheck('link', 'image'), (req, res, next) => {
+router.post('/user/sub_mission/:id.json', userParser.withSocialAccounts, argsCheck('link', 'image'), (req, res, next) => {
   const { authUser } = req;
   const { params } = req;
   const { id } = params;
   const { link, image } = req.body;
 
-  // TODO: 判断任务是否结束
-
-  UserSubMission.create({
-    userId: authUser.id,
-    subMissionId: id,
-    link,
-    image,
-  }).then((subMission) => {
-    res.json_data = subMission.getData();
-    next();
+  // 判断任务是否结束，判断用户是否绑定指定账户
+  SubMission.findByPk(id, { include: ['mission'] }).then((instance) => {
+    if (!instance) {
+      res.status(404).end();
+      return;
+    }
+    if (instance.mission.state !== DB.MISSION_STATE.progressing) {
+      res.json_error_code = ERROR.USER.MISSION_STATE_ERR.code;
+      res.json_error = ERROR.USER.MISSION_STATE_ERR.message;
+      next();
+      return;
+    }
+    const userData = authUser.getData();
+    const socialAccount = (userData.socialAccounts || {})[instance.provider];
+    if (!socialAccount) {
+      res.json_error_code = ERROR.USER.MISSION_NO_ACCOUNT_ERR.code;
+      res.json_error = ERROR.USER.MISSION_NO_ACCOUNT_ERR.message;
+      next();
+      return;
+    }
+    UserSubMission.create({
+      userId: authUser.id,
+      subMissionId: id,
+      link,
+      image,
+    }).then((subMission) => {
+      res.json_data = subMission.getData();
+      next();
+    });
   });
 }, jsonResponse);
 

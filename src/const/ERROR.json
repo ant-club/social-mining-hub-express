@@ -23,6 +23,14 @@
     "ADDRESS_SIGN_ERR": {
       "code": 602,
       "message": "login signature error"
+    },
+    "MISSION_STATE_ERR": {
+      "code": 603,
+      "message": "mission state error"
+    },
+    "MISSION_NO_ACCOUNT_ERR": {
+      "code": 604,
+      "message": "user does not have social account"
     }
   }
 }
