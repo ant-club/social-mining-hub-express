@@ -13,15 +13,13 @@ const router = express.Router();
 const { Mission } = Models;
 
 router.get('/missions.json', (req, res, next) => {
+  const { state } = req.query;
+  const where = {};
+  if (state) {
+    where.state = state;
+  }
   Mission.findAll({
-    where: {
-      startAt: {
-        [Op.lt]: new Date(),
-      },
-      endAt: {
-        [Op.gt]: new Date(),
-      },
-    },
+    where,
   }).then((missions) => {
     res.json_data = missions.map((m) => m.getData());
     next();
