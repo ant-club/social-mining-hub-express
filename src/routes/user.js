@@ -10,9 +10,10 @@ import * as ethUtil from 'ethereumjs-util';
 import * as sigUtil from 'eth-sig-util';
 import argsCheck from '@middlewares/argsCheck';
 import { getCookieValue, setCookieValue } from '@utils/cookie';
+import { time } from 'speakeasy';
 
 const router = express.Router();
-const { User, UserSubMission, SubMission, Mission } = Models;
+const { User, UserSubMission, SubMission, Mission, Timeline } = Models;
 
 const LOGIN_MESSAGE = '[%nonce] I will login Ant Club for ONE time';
 
@@ -177,6 +178,52 @@ router.get('/user/sub_missions.json', userParser, (req, res, next) => {
       return data;
     });
     next();
+  });
+}, jsonResponse);
+
+const TIMELINE_PAGE_LIMIT = 10;
+router.get('/user/timeline.json', userParser, (req, res, next) => {
+  const { authUser } = req;
+  const { page } = req.query;
+  let offset = 0;
+  const iPage = parseInt(page, 10);
+  if (iPage) {
+    offset = (iPage - 1) * TIMELINE_PAGE_LIMIT;
+  }
+
+  Timeline.findAll({
+    where: {
+      userId: authUser.id,
+    },
+    offset,
+    limit: TIMELINE_PAGE_LIMIT,
+    order: [['id', 'DESC']],
+  }).then((rows) => {
+    res.json_data = rows.map((row) => row.getData());
+    next();
+  });
+}, jsonResponse);
+
+router.get('/user/timeline/:id.json', userParser, (req, res, next) => {
+  const { authUser } = req;
+  const { id } = req.params;
+
+  Timeline.findOne({
+    where: {
+      id,
+      userId: authUser.id,
+    },
+  }).then((timeline) => {
+    if (!timeline) {
+      res.status(404).end();
+      return;
+    }
+    timeline.getRelatedModel().then((relatedModel) => {
+      const data = timeline.getData();
+      data.relatedModel = relatedModel.getData();
+      res.json_data = data;
+      next();
+    });
   });
 }, jsonResponse);
 
