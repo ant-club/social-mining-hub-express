@@ -33,7 +33,7 @@ function model(sequelize) {
       allowNull: false,
     },
     description: {
-      type: Sequelize.STRING,
+      type: Sequelize.STRING(1000),
       allowNull: false,
     },
     provider: {
